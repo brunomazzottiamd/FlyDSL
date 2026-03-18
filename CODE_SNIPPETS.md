@@ -2092,7 +2092,41 @@ Error  : (none)
 
 ---
 
-### Snippet 2 — Import `flydsl.compiler`
+### Snippet 2 — Arithmetic operations (`arith`)
+
+```python
+from flydsl.expr import arith
+
+c = arith.constant(42, index=True)
+v = arith.index_cast(T.index, val)
+r = arith.select(cond, a, b)
+```
+
+```
+Status : [ ] pass  [ ] fail
+Error  : (none)
+```
+
+---
+
+### Snippet 3 — Buffer operations (`buffer_ops`)
+
+```python
+from flydsl.expr import buffer_ops
+
+rsrc = buffer_ops.create_buffer_resource(tensor, max_size=True)
+data = buffer_ops.buffer_load(rsrc, offset, vec_width=4, dtype=T.i32)
+buffer_ops.buffer_store(data, rsrc, offset, mask=is_valid)
+```
+
+```
+Status : [ ] pass  [ ] fail
+Error  : (none)
+```
+
+---
+
+### Snippet 4 — Import `flydsl.compiler`
 
 ```python
 import flydsl.compiler as flyc
