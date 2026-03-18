@@ -206,7 +206,7 @@ frag = fx.make_fragment_like(partition_src)
 ```
 Status : [ ] pass  [x] fail
 Error  : NameError: name 'fx' is not defined
-         After adding 'import flydsl.expr as fx'
+         After adding 'import flydsl.expr as fx':
          NameError: name 'A' is not defined
 ```
 
@@ -226,27 +226,15 @@ lds_ptr = lds_gen(base)
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : NameError: name 'ctx' is not defined
 ```
+
+**Question:** Can we run this sample on `gfx950`? There's a hardcoded `gfx942` string.
 
 ---
 
-### Snippet 5 — XOR-based swizzle (manual implementation)
-
-```python
-# XOR-based swizzle at 16-byte granularity (manual implementation)
-col_swizzled = col_bytes ^ ((row % k_blocks16) << 4)
-```
-
-```
-Status : [ ] pass  [ ] fail
-Error  : (none)
-```
-
----
-
-### Snippet 6 — Copy atoms and tiled copies
+### Snippet 5 — Copy atoms and tiled copies
 
 ```python
 copy_atom = fx.make_copy_atom(fx.rocdl.BufferCopy128b(), fx.Float32)
@@ -268,13 +256,15 @@ fx.copy(copy_atom, src_partition, dst_partition)
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : NameError: name 'fx' is not defined
+         After adding 'import flydsl.expr as fx':
+         RuntimeError: An MLIR function requires a Context but none was provided in the call or from the surrounding environment. Either pass to the function with a 'context=' argument or establish a default using 'with Context():'
 ```
 
 ---
 
-### Snippet 7 — Buffer loads (AMD-specific)
+### Snippet 6 — Buffer loads (AMD-specific)
 
 ```python
 A_buf = fx.rocdl.make_buffer_tensor(A)
@@ -284,13 +274,15 @@ copy_atom = fx.make_copy_atom(fx.rocdl.BufferCopy128b(), fx.Float32)
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : NameError: name 'fx' is not defined
+         After adding 'import flydsl.expr as fx':
+         NameError: name 'A' is not defined
 ```
 
 ---
 
-### Snippet 8 — MFMA compute operations
+### Snippet 7 — MFMA compute operations
 
 ```python
 mma_atom = fx.make_mma_atom(fx.rocdl.MFMA(16, 16, 4, fx.Float32))
@@ -305,13 +297,15 @@ fx.gemm(mma_atom, frag_C, frag_A, frag_B, frag_C)
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : NameError: name 'fx' is not defined
+         After adding 'import flydsl.expr as fx':
+         RuntimeError: An MLIR function requires a Context but none was provided in the call or from the surrounding environment. Either pass to the function with a 'context=' argument or establish a default using 'with Context():'
 ```
 
 ---
 
-### Snippet 9 — K64-byte micro-step pattern
+### Snippet 8 — K64-byte micro-step pattern
 
 ```python
 for ku in range(tile_k_bytes // 64):
@@ -325,26 +319,13 @@ for ku in range(tile_k_bytes // 64):
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : NameError: name 'tile_k_bytes' is not defined
 ```
 
 ---
 
-### Snippet 10 — Workgroup barrier
-
-```python
-fx.gpu.barrier()
-```
-
-```
-Status : [ ] pass  [ ] fail
-Error  : (none)
-```
-
----
-
-### Snippet 11 — Compilation and execution pattern
+### Snippet 9 — Compilation and execution pattern
 
 ```python
 import flydsl.compiler as flyc
@@ -367,13 +348,13 @@ launch(A_torch, B_torch, C_torch, ..., stream=torch.cuda.Stream())
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : SyntaxError: invalid syntax
 ```
 
 ---
 
-### Snippet 12 — Complete GEMM example with layout algebra
+### Snippet 10 — Complete GEMM example with layout algebra
 
 ```python
 import torch
@@ -427,9 +408,10 @@ def tiledMma(A: fx.Tensor, B: fx.Tensor, C: fx.Tensor,
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [x] pass  [ ] fail
 ```
+
+Question: How to "Store result back to C"? This part is missing.
 
 ---
 
@@ -469,8 +451,8 @@ id_tensor = fx.make_identity_tensor((M, N))
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : RuntimeError: An MLIR function requires a Context but none was provided in the call or from the surrounding environment. Either pass to the function with a 'context=' argument or establish a default using 'with Context():'
 ```
 
 ---
