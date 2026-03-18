@@ -28,8 +28,7 @@ def launch(arg_a: fx.Tensor, arg_b: fx.Tensor, n: fx.Constexpr[int],
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [x] pass  [ ] fail
 ```
 
 ---
@@ -59,8 +58,8 @@ fx.copy(copy_atom, partition_src, partition_dst)
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : NameError: name 'THR_M' is not defined
 ```
 
 ---
@@ -129,8 +128,8 @@ print("Result correct:", torch.allclose(C, A + B))
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : AttributeError: module 'flydsl.expr' has no attribute 'CopyAtomUniversalCopyType'
 ```
 
 ---
@@ -147,8 +146,10 @@ coord = fx.make_coord(3, 5)
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : NameError: name 'fx' is not definedimport flydsl.expr as fx
+         After adding 'import flydsl.expr as fx':
+         RuntimeError: An MLIR function requires a Context but none was provided in the call or from the surrounding environment. Either pass to the function with a 'context=' argument or establish a default using 'with Context():'
 ```
 
 ---
@@ -183,8 +184,7 @@ def launch(
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [x] pass  [ ] fail
 ```
 
 ---
@@ -204,8 +204,10 @@ frag = fx.make_fragment_like(partition_src)
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : NameError: name 'fx' is not defined
+         After adding 'import flydsl.expr as fx'
+         NameError: name 'A' is not defined
 ```
 
 ---
