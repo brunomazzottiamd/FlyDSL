@@ -4,7 +4,7 @@ Extracted from all documentation Markdown files. Snippets appear in the same ord
 
 ## `README.md`
 
-### Snippet 1 — `@flyc.kernel` / `@flyc.jit` API
+### Snippet 1 - `@flyc.kernel` / `@flyc.jit` API
 
 ```python
 import flydsl.compiler as flyc
@@ -33,7 +33,7 @@ Status : [x] pass  [ ] fail
 
 ---
 
-### Snippet 2 — Hierarchical Kernel Control (tiled copy)
+### Snippet 2 - Hierarchical Kernel Control (tiled copy)
 
 ```python
 import flydsl.expr as fx
@@ -64,7 +64,7 @@ Error  : NameError: name 'THR_M' is not defined
 
 ---
 
-### Snippet 3 — Minimal VecAdd Example
+### Snippet 3 - Minimal VecAdd Example
 
 ```python
 import torch
@@ -136,7 +136,7 @@ Error  : AttributeError: module 'flydsl.expr' has no attribute 'CopyAtomUniversa
 
 ## `docs/cute_layout_algebra_guide.md`
 
-### Snippet 1 — Core Types construction
+### Snippet 1 - Core Types construction
 
 ```python
 shape = fx.make_shape(128, 64)
@@ -147,14 +147,14 @@ coord = fx.make_coord(3, 5)
 
 ```
 Status : [ ] pass  [x] fail
-Error  : NameError: name 'fx' is not definedimport flydsl.expr as fx
+Error  : NameError: name 'fx' is not defined
          After adding 'import flydsl.expr as fx':
          RuntimeError: An MLIR function requires a Context but none was provided in the call or from the surrounding environment. Either pass to the function with a 'context=' argument or establish a default using 'with Context():'
 ```
 
 ---
 
-### Snippet 2 — Kernel development pattern
+### Snippet 2 - Kernel development pattern
 
 ```python
 import flydsl.compiler as flyc
@@ -169,7 +169,7 @@ def my_kernel(
 ):
     tid = fx.thread_idx.x
     bid = fx.block_idx.x
-    # Kernel body — use layout algebra here
+    # Kernel body - use layout algebra here
     ...
 
 @flyc.jit
@@ -189,7 +189,7 @@ Status : [x] pass  [ ] fail
 
 ---
 
-### Snippet 3 — Tensor construction with layout algebra
+### Snippet 3 - Tensor construction with layout algebra
 
 ```python
 # Create a buffer tensor from a tensor argument (AMD buffer descriptor)
@@ -212,7 +212,7 @@ Error  : NameError: name 'fx' is not defined
 
 ---
 
-### Snippet 4 — LDS allocation
+### Snippet 4 - LDS allocation
 
 ```python
 from flydsl.utils.smem_allocator import SmemAllocator
@@ -230,11 +230,13 @@ Status : [ ] pass  [x] fail
 Error  : NameError: name 'ctx' is not defined
 ```
 
-**Question:** Can we run this sample on `gfx950`? There's a hardcoded `gfx942` string.
+How can I get a context? It's materializing out of thin air.
+
+Is this sample code supposed to run on `gfx950` too? We have a hardcoded `gfx942`.
 
 ---
 
-### Snippet 5 — Copy atoms and tiled copies
+### Snippet 5 - Copy atoms and tiled copies
 
 ```python
 copy_atom = fx.make_copy_atom(fx.rocdl.BufferCopy128b(), fx.Float32)
@@ -264,7 +266,7 @@ Error  : NameError: name 'fx' is not defined
 
 ---
 
-### Snippet 6 — Buffer loads (AMD-specific)
+### Snippet 6 - Buffer loads (AMD-specific)
 
 ```python
 A_buf = fx.rocdl.make_buffer_tensor(A)
@@ -282,7 +284,7 @@ Error  : NameError: name 'fx' is not defined
 
 ---
 
-### Snippet 7 — MFMA compute operations
+### Snippet 7 - MFMA compute operations
 
 ```python
 mma_atom = fx.make_mma_atom(fx.rocdl.MFMA(16, 16, 4, fx.Float32))
@@ -305,7 +307,7 @@ Error  : NameError: name 'fx' is not defined
 
 ---
 
-### Snippet 8 — K64-byte micro-step pattern
+### Snippet 8 - K64-byte micro-step pattern
 
 ```python
 for ku in range(tile_k_bytes // 64):
@@ -325,7 +327,7 @@ Error  : NameError: name 'tile_k_bytes' is not defined
 
 ---
 
-### Snippet 9 — Compilation and execution pattern
+### Snippet 9 - Compilation and execution pattern
 
 ```python
 import flydsl.compiler as flyc
@@ -343,7 +345,7 @@ def launch(A: fx.Tensor, B: fx.Tensor, C, ...,
         grid=(...), block=(...), stream=stream,
     )
 
-# Call the jit function — compilation happens automatically on first call
+# Call the jit function - compilation happens automatically on first call
 launch(A_torch, B_torch, C_torch, ..., stream=torch.cuda.Stream())
 ```
 
@@ -354,7 +356,7 @@ Error  : SyntaxError: invalid syntax
 
 ---
 
-### Snippet 10 — Complete GEMM example with layout algebra
+### Snippet 10 - Complete GEMM example with layout algebra
 
 ```python
 import torch
@@ -411,13 +413,13 @@ def tiledMma(A: fx.Tensor, B: fx.Tensor, C: fx.Tensor,
 Status : [x] pass  [ ] fail
 ```
 
-Question: How to "Store result back to C"? This part is missing.
+This example runs fine, but it's incomplete. What should I do to copy data from memory to register fragments and store back to global memory?
 
 ---
 
 ## `docs/layout_system_guide.md`
 
-### Snippet 1 — Layout construction API
+### Snippet 1 - Layout construction API
 
 ```python
 import flydsl.expr as fx
@@ -429,7 +431,7 @@ shape = fx.make_shape(8, 16)              # !fly.int_tuple<(8, 16)>
 stride = fx.make_stride(1, 8)             # !fly.int_tuple<(1, 8)>
 layout = fx.make_layout(shape, stride)    # !fly.layout<(8, 16):(1, 8)>
 
-# Shorthand — pass Python tuples directly
+# Shorthand - pass Python tuples directly
 layout = fx.make_layout((8, 16), (1, 8))
 
 # Coordinates
@@ -441,7 +443,7 @@ it = fx.make_int_tuple((4, 8, 2))
 # Nested shapes
 shape_nested = fx.make_shape(9, (4, 8))   # (9, (4, 8))
 
-# Ordered layout — specify stride order (e.g., column-major vs row-major)
+# Ordered layout - specify stride order (e.g., column-major vs row-major)
 col_major = fx.make_ordered_layout((M, N), order=(0, 1))  # stride order: M-first
 row_major = fx.make_ordered_layout((M, N), order=(1, 0))  # stride order: N-first
 
@@ -457,33 +459,7 @@ Error  : RuntimeError: An MLIR function requires a Context but none was provided
 
 ---
 
-### Snippet 2 — `crd2idx`
-
-```python
-idx = fx.crd2idx(coord, layout)
-```
-
-```
-Status : [ ] pass  [ ] fail
-Error  : (none)
-```
-
----
-
-### Snippet 3 — `idx2crd`
-
-```python
-coord = fx.idx2crd(idx, layout)
-```
-
-```
-Status : [ ] pass  [ ] fail
-Error  : (none)
-```
-
----
-
-### Snippet 4 — Pure-arith helpers (`kernels/layout_utils.py`)
+### Snippet 2 - Pure-arith helpers (`kernels/layout_utils.py`)
 
 ```python
 from kernels.layout_utils import crd2idx, idx2crd, get as layout_get
@@ -495,13 +471,13 @@ dim_val = layout_get(int_tuple, 0)
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : NameError: name 'row' is not defined
 ```
 
 ---
 
-### Snippet 5 — Query operations
+### Snippet 3 - Query operations
 
 ```python
 s = fx.size(layout)           # total elements (returns Int32 for static)
@@ -513,13 +489,15 @@ r = fx.rank(shape)            # number of modes
 ```
 
 ```
-Status : [ ] pass  [ ] fail
-Error  : (none)
+Status : [ ] pass  [x] fail
+Error  : NameError: name 'fx' is not defined
+         After adding 'import flydsl.expr as fx':
+         NameError: name 'layout' is not defined
 ```
 
 ---
 
-### Snippet 6 — Composition
+### Snippet 6 - Composition
 
 ```python
 composed = fx.composition(layout_a, layout_b)
@@ -532,7 +510,7 @@ Error  : (none)
 
 ---
 
-### Snippet 7 — Complement
+### Snippet 7 - Complement
 
 ```python
 rest = fx.complement(tiler, target_size)
@@ -545,7 +523,7 @@ Error  : (none)
 
 ---
 
-### Snippet 8 — Coalesce
+### Snippet 8 - Coalesce
 
 ```python
 simplified = fx.coalesce(layout)
@@ -558,7 +536,7 @@ Error  : (none)
 
 ---
 
-### Snippet 9 — Right inverse
+### Snippet 9 - Right inverse
 
 ```python
 inv = fx.right_inverse(layout)
@@ -571,7 +549,7 @@ Error  : (none)
 
 ---
 
-### Snippet 10 — Recast layout
+### Snippet 10 - Recast layout
 
 ```python
 # Convert layout from 16-bit to 8-bit elements
@@ -585,7 +563,7 @@ Error  : (none)
 
 ---
 
-### Snippet 11 — Product operations
+### Snippet 11 - Product operations
 
 ```python
 result = fx.logical_product(layout, tiler)
@@ -600,7 +578,7 @@ Error  : (none)
 
 ---
 
-### Snippet 12 — Divide operations
+### Snippet 12 - Divide operations
 
 ```python
 result = fx.logical_divide(layout, divisor)
@@ -614,7 +592,7 @@ Error  : (none)
 
 ---
 
-### Snippet 13 — `select`
+### Snippet 13 - `select`
 
 ```python
 selected = fx.select(int_tuple, indices=[0, 2])  # pick modes 0 and 2
@@ -627,7 +605,7 @@ Error  : (none)
 
 ---
 
-### Snippet 14 — `group`
+### Snippet 14 - `group`
 
 ```python
 grouped = fx.group(int_tuple, begin=1, end=3)
@@ -640,7 +618,7 @@ Error  : (none)
 
 ---
 
-### Snippet 15 — `append` / `prepend`
+### Snippet 15 - `append` / `prepend`
 
 ```python
 extended = fx.append(base_tuple, new_elem)
@@ -654,7 +632,7 @@ Error  : (none)
 
 ---
 
-### Snippet 16 — `zip`
+### Snippet 16 - `zip`
 
 ```python
 zipped = fx.zip(shapes_a, shapes_b)
@@ -667,7 +645,7 @@ Error  : (none)
 
 ---
 
-### Snippet 17 — `slice`
+### Snippet 17 - `slice`
 
 ```python
 sliced = fx.slice(layout, coord)
@@ -680,7 +658,7 @@ Error  : (none)
 
 ---
 
-### Snippet 18 — MemRef operations
+### Snippet 18 - MemRef operations
 
 ```python
 # Allocate on-chip memory with layout
@@ -708,7 +686,7 @@ Error  : (none)
 
 ---
 
-### Snippet 19 — View and offset
+### Snippet 19 - View and offset
 
 ```python
 # Create a view from iterator + layout
@@ -725,7 +703,7 @@ Error  : (none)
 
 ---
 
-### Snippet 20 — Copy atom and tiled copy construction
+### Snippet 20 - Copy atom and tiled copy construction
 
 ```python
 # Create copy atom (copy_op_type, elem_type)
@@ -757,7 +735,7 @@ Error  : (none)
 
 ---
 
-### Snippet 21 — Thread slicing and partitioning
+### Snippet 21 - Thread slicing and partitioning
 
 ```python
 # Get a per-thread view of a tiled copy
@@ -785,7 +763,7 @@ Error  : (none)
 
 ---
 
-### Snippet 22 — Copy and GEMM execution
+### Snippet 22 - Copy and GEMM execution
 
 ```python
 # Execute tiled copy
@@ -805,7 +783,7 @@ Error  : (none)
 
 ---
 
-### Snippet 23 — Nested / hierarchical layout
+### Snippet 23 - Nested / hierarchical layout
 
 ```python
 # Nested shape: 9 elements in first mode, (4, 8) = 32 elements in second
@@ -819,7 +797,7 @@ Error  : (none)
 
 ---
 
-### Snippet 24 — IntTuple arithmetic
+### Snippet 24 - IntTuple arithmetic
 
 ```python
 # Element-wise operations on IntTuples
@@ -842,7 +820,7 @@ Error  : (none)
 
 ---
 
-### Snippet 25 — Printf debugging
+### Snippet 25 - Printf debugging
 
 ```python
 fx.printf("tid={} bid={} val={}", tid, bid, value)
@@ -857,7 +835,7 @@ Error  : (none)
 
 ## `docs/prebuilt_kernels_guide.md`
 
-### Snippet 1 — Build LayerNorm module
+### Snippet 1 - Build LayerNorm module
 
 ```python
 from kernels.layernorm_kernel import build_layernorm_module
@@ -872,7 +850,7 @@ Error  : (none)
 
 ---
 
-### Snippet 2 — Build RMSNorm module
+### Snippet 2 - Build RMSNorm module
 
 ```python
 from kernels.rmsnorm_kernel import build_rmsnorm_module
@@ -887,7 +865,7 @@ Error  : (none)
 
 ---
 
-### Snippet 3 — Build Softmax module
+### Snippet 3 - Build Softmax module
 
 ```python
 from kernels.softmax_kernel import build_softmax_module
@@ -902,7 +880,7 @@ Error  : (none)
 
 ---
 
-### Snippet 4 — Compile preshuffle GEMM
+### Snippet 4 - Compile preshuffle GEMM
 
 ```python
 from kernels.preshuffle_gemm import compile_preshuffle_gemm_a8
@@ -923,7 +901,7 @@ Error  : (none)
 
 ---
 
-### Snippet 5 — New API style (GEMM kernel)
+### Snippet 5 - New API style (GEMM kernel)
 
 ```python
 import flydsl.compiler as flyc
@@ -949,7 +927,7 @@ Error  : (none)
 
 ## `docs/testing_benchmarking_guide.md`
 
-### Snippet 1 — pytest fixtures (`conftest.py`)
+### Snippet 1 - pytest fixtures (`conftest.py`)
 
 ```python
 @pytest.fixture
@@ -973,7 +951,7 @@ Error  : (none)
 
 ---
 
-### Snippet 2 — `perftest` decorator
+### Snippet 2 - `perftest` decorator
 
 ```python
 @perftest(num_iters=20, num_warmup=3, testGraph=False, num_rotate_args=0)
@@ -989,7 +967,7 @@ Error  : (none)
 
 ---
 
-### Snippet 3 — `checkAllclose`
+### Snippet 3 - `checkAllclose`
 
 ```python
 checkAllclose(output, reference, rtol=1e-2, atol=1e-2, tol_err_ratio=0.05)
@@ -1002,7 +980,7 @@ Error  : (none)
 
 ---
 
-### Snippet 4 — `verify_output`
+### Snippet 4 - `verify_output`
 
 ```python
 verify_output(c_out, c_ref, atol=1e-2, rtol=1e-2, msg='')
@@ -1015,7 +993,7 @@ Error  : (none)
 
 ---
 
-### Snippet 5 — `bench_gpu_us_torch`
+### Snippet 5 - `bench_gpu_us_torch`
 
 ```python
 # Measure device time (torch CUDA events)
@@ -1029,7 +1007,7 @@ Error  : (none)
 
 ---
 
-### Snippet 6 — `compile_to_hsaco`
+### Snippet 6 - `compile_to_hsaco`
 
 ```python
 from tests.utils import compile_to_hsaco
@@ -1044,7 +1022,7 @@ Error  : (none)
 
 ---
 
-### Snippet 7 — Weight utilities
+### Snippet 7 - Weight utilities
 
 ```python
 from tests.utils import pertoken_quant, shuffle_weight
@@ -1063,7 +1041,7 @@ Error  : (none)
 
 ---
 
-### Snippet 8 — PyIR test pattern (no GPU)
+### Snippet 8 - PyIR test pattern (no GPU)
 
 ```python
 # tests/pyir/test_my_feature.py
@@ -1086,7 +1064,7 @@ Error  : (none)
 
 ---
 
-### Snippet 9 — GPU kernel test pattern (new API)
+### Snippet 9 - GPU kernel test pattern (new API)
 
 ```python
 # tests/kernels/test_my_kernel.py
@@ -1129,7 +1107,7 @@ Error  : (none)
 
 ---
 
-### Snippet 10 — Benchmark test pattern
+### Snippet 10 - Benchmark test pattern
 
 ```python
 from tests.kernels.benchmark_common import bench_gpu_us_torch
@@ -1159,7 +1137,7 @@ Error  : (none)
 
 ## `docs/kernel_authoring_guide.md`
 
-### Snippet 1 — Basic kernel pattern (`@flyc.kernel` + `@flyc.jit`)
+### Snippet 1 - Basic kernel pattern (`@flyc.kernel` + `@flyc.jit`)
 
 ```python
 import flydsl.compiler as flyc
@@ -1208,7 +1186,7 @@ Error  : (none)
 
 ---
 
-### Snippet 2 — `fx.Tensor` parameter
+### Snippet 2 - `fx.Tensor` parameter
 
 ```python
 @flyc.kernel
@@ -1224,7 +1202,7 @@ Error  : (none)
 
 ---
 
-### Snippet 3 — `fx.Constexpr[T]` parameter
+### Snippet 3 - `fx.Constexpr[T]` parameter
 
 ```python
 @flyc.kernel
@@ -1240,7 +1218,7 @@ Error  : (none)
 
 ---
 
-### Snippet 4 — `fx.Int32` parameter
+### Snippet 4 - `fx.Int32` parameter
 
 ```python
 @flyc.jit
@@ -1255,7 +1233,7 @@ Error  : (none)
 
 ---
 
-### Snippet 5 — `fx.Stream` parameter
+### Snippet 5 - `fx.Stream` parameter
 
 ```python
 @flyc.jit
@@ -1274,7 +1252,7 @@ Error  : (none)
 
 ---
 
-### Snippet 6 — Custom argument types
+### Snippet 6 - Custom argument types
 
 ```python
 from flydsl.compiler import JitArgumentRegistry
@@ -1298,7 +1276,7 @@ Error  : (none)
 
 ---
 
-### Snippet 7 — Thread / block hierarchy
+### Snippet 7 - Thread / block hierarchy
 
 ```python
 from flydsl.expr import gpu
@@ -1330,7 +1308,7 @@ Error  : (none)
 
 ---
 
-### Snippet 8 — Arithmetic (`arith`)
+### Snippet 8 - Arithmetic (`arith`)
 
 ```python
 from flydsl.expr import arith
@@ -1365,7 +1343,7 @@ Error  : (none)
 
 ---
 
-### Snippet 9 — Vector operations
+### Snippet 9 - Vector operations
 
 ```python
 from flydsl.expr import vector
@@ -1388,7 +1366,7 @@ Error  : (none)
 
 ---
 
-### Snippet 10 — Buffer operations
+### Snippet 10 - Buffer operations
 
 ```python
 from flydsl.expr import buffer_ops
@@ -1410,15 +1388,15 @@ Error  : (none)
 
 ---
 
-### Snippet 11 — ROCm high-level helpers (`rocdl`)
+### Snippet 11 - ROCm high-level helpers (`rocdl`)
 
 ```python
 from flydsl.expr import rocdl
 
-# Buffer tensor — wraps a Tensor with AMD buffer resource descriptor
+# Buffer tensor - wraps a Tensor with AMD buffer resource descriptor
 A_buf = rocdl.make_buffer_tensor(A)
 
-# MFMA MMA atom constructor — returns MmaAtomCDNA3_MFMAType
+# MFMA MMA atom constructor - returns MmaAtomCDNA3_MFMAType
 atom_type = rocdl.MFMA(m=16, n=16, k=32, elem_ty_ab=fx.Float8E4M3FNUZ)
 
 # Buffer copy atom types
@@ -1434,7 +1412,7 @@ Error  : (none)
 
 ---
 
-### Snippet 12 — MFMA instructions
+### Snippet 12 - MFMA instructions
 
 ```python
 result = rocdl.mfma_f32_16x16x16f16(result_type, [a, b, acc])
@@ -1455,7 +1433,7 @@ Error  : (none)
 
 ---
 
-### Snippet 13 — Instruction scheduling barriers
+### Snippet 13 - Instruction scheduling barriers
 
 ```python
 rocdl.sched_mfma(cnt)    # wait for cnt MFMA instructions to complete
@@ -1471,7 +1449,7 @@ Error  : (none)
 
 ---
 
-### Snippet 14 — Low-level ROCm ops
+### Snippet 14 - Low-level ROCm ops
 
 ```python
 # Warp shuffle
@@ -1489,7 +1467,7 @@ Error  : (none)
 
 ---
 
-### Snippet 15 — GPU operations
+### Snippet 15 - GPU operations
 
 ```python
 from flydsl.expr import gpu
@@ -1509,7 +1487,7 @@ Error  : (none)
 
 ---
 
-### Snippet 16 — Control flow (Python loops → MLIR SCF)
+### Snippet 16 - Control flow (Python loops → MLIR SCF)
 
 ```python
 @flyc.kernel
@@ -1531,7 +1509,7 @@ Error  : (none)
 
 ---
 
-### Snippet 17 — `const_expr()`
+### Snippet 17 - `const_expr()`
 
 ```python
 from flydsl.expr import const_expr
@@ -1550,7 +1528,7 @@ Error  : (none)
 
 ---
 
-### Snippet 18 — `SmemAllocator` (shared memory / LDS)
+### Snippet 18 - `SmemAllocator` (shared memory / LDS)
 
 ```python
 from flydsl.utils.smem_allocator import SmemAllocator
@@ -1580,7 +1558,7 @@ Error  : (none)
 
 ---
 
-### Snippet 19 — Finalizing LDS allocation
+### Snippet 19 - Finalizing LDS allocation
 
 ```python
 comp_ctx = CompilationContext.get_current()
@@ -1595,7 +1573,7 @@ Error  : (none)
 
 ---
 
-### Snippet 20 — Launch configuration
+### Snippet 20 - Launch configuration
 
 ```python
 @flyc.jit
@@ -1615,7 +1593,7 @@ Error  : (none)
 
 ---
 
-### Snippet 21 — Dynamic grid/block dimensions
+### Snippet 21 - Dynamic grid/block dimensions
 
 ```python
 @flyc.jit
@@ -1635,7 +1613,7 @@ Error  : (none)
 
 ---
 
-### Snippet 22 — Workgroup synchronization (barrier)
+### Snippet 22 - Workgroup synchronization (barrier)
 
 ```python
 from flydsl.expr import gpu
@@ -1651,7 +1629,7 @@ Error  : (none)
 
 ---
 
-### Snippet 23 — Complete example: Preshuffle GEMM
+### Snippet 23 - Complete example: Preshuffle GEMM
 
 ```python
 import flydsl.compiler as flyc
@@ -1701,7 +1679,7 @@ Error  : (none)
 
 ## `docs/architecture_guide.md`
 
-### Snippet 1 — `@flyc.jit` decorator
+### Snippet 1 - `@flyc.jit` decorator
 
 ```python
 import flydsl.compiler as flyc
@@ -1720,7 +1698,7 @@ Error  : (none)
 
 ---
 
-### Snippet 2 — `@flyc.kernel` decorator
+### Snippet 2 - `@flyc.kernel` decorator
 
 ```python
 @flyc.kernel
@@ -1737,7 +1715,7 @@ Error  : (none)
 
 ---
 
-### Snippet 3 — `KernelLauncher`
+### Snippet 3 - `KernelLauncher`
 
 ```python
 launcher = my_kernel(a, b, 1024)
@@ -1756,16 +1734,16 @@ Error  : (none)
 
 ---
 
-### Snippet 4 — `DslType` / `JitArgument` protocols
+### Snippet 4 - `DslType` / `JitArgument` protocols
 
 ```python
-# DslType protocol — for values used inside kernel/jit functions
+# DslType protocol - for values used inside kernel/jit functions
 class DslType(Protocol):
     @classmethod
     def __fly_construct__(cls, values: List[ir.Value]) -> "DslType": ...
     def __fly_values__(self) -> List[ir.Value]: ...
 
-# JitArgument protocol — for values passed at the host boundary
+# JitArgument protocol - for values passed at the host boundary
 class JitArgument(Protocol):
     def __fly_types__(self) -> List[ir.Type]: ...
     def __fly_ptrs__(self) -> List[ctypes.c_void_p]: ...
@@ -1778,7 +1756,7 @@ Error  : (none)
 
 ---
 
-### Snippet 5 — Registering custom argument types
+### Snippet 5 - Registering custom argument types
 
 ```python
 from flydsl.compiler import JitArgumentRegistry
@@ -1798,7 +1776,7 @@ Error  : (none)
 
 ## `docs/quickstart.rst`
 
-### Snippet 1 — Minimal Vector Add kernel
+### Snippet 1 - Minimal Vector Add kernel
 
 ```python
 import torch
@@ -1865,11 +1843,15 @@ Status : [ ] pass  [ ] fail
 Error  : (none)
 ```
 
+It's using non-existing / outdated part of the API. I'm not certain what's going on in this case, maybe then entity was renamed or moved to another package.
+
+There's a `const_n` argument in the launch wrapper that's unused, and it's passed as `n + 1`. What's the purpose of doing this in a vector add example? In my humble opinion, if we want to showcase language features, then we should do it in another context.
+
 ---
 
 ## `docs/tutorials/basic_usage.rst`
 
-### Snippet 1 — Layout creation inside a kernel
+### Snippet 1 - Layout creation inside a kernel
 
 ```python
 import flydsl.compiler as flyc
@@ -1889,7 +1871,7 @@ Error  : (none)
 
 ---
 
-### Snippet 2 — Kernel definition with `@flyc.kernel`
+### Snippet 2 - Kernel definition with `@flyc.kernel`
 
 ```python
 import flydsl.compiler as flyc
@@ -1912,7 +1894,7 @@ Error  : (none)
 
 ---
 
-### Snippet 3 — Launching a kernel with `@flyc.jit`
+### Snippet 3 - Launching a kernel with `@flyc.jit`
 
 ```python
 @flyc.jit
@@ -1943,7 +1925,7 @@ Error  : (none)
 
 ## `docs/tutorials/kernel_development.rst`
 
-### Snippet 1 — Tiled copies
+### Snippet 1 - Tiled copies
 
 ```python
 import flydsl.compiler as flyc
@@ -1981,7 +1963,7 @@ Error  : (none)
 
 ---
 
-### Snippet 2 — MFMA instructions
+### Snippet 2 - MFMA instructions
 
 ```python
 import flydsl.compiler as flyc
@@ -2014,7 +1996,7 @@ Error  : (none)
 
 ## `docs/api/compiler.rst`
 
-### Snippet 1 — `@flyc.kernel` and `@flyc.jit`
+### Snippet 1 - `@flyc.kernel` and `@flyc.jit`
 
 ```python
 import flydsl.compiler as flyc
@@ -2043,7 +2025,7 @@ Error  : (none)
 
 ---
 
-### Snippet 2 — `flyc.from_dlpack`
+### Snippet 2 - `flyc.from_dlpack`
 
 ```python
 import flydsl.compiler as flyc
@@ -2063,7 +2045,7 @@ Error  : (none)
 
 ## `docs/api/dsl.rst`
 
-### Snippet 1 — Import `flydsl.expr`
+### Snippet 1 - Import `flydsl.expr`
 
 ```python
 import flydsl.expr as fx
@@ -2076,7 +2058,7 @@ Error  : (none)
 
 ---
 
-### Snippet 2 — Arithmetic operations (`arith`)
+### Snippet 2 - Arithmetic operations (`arith`)
 
 ```python
 from flydsl.expr import arith
@@ -2093,7 +2075,7 @@ Error  : (none)
 
 ---
 
-### Snippet 3 — Buffer operations (`buffer_ops`)
+### Snippet 3 - Buffer operations (`buffer_ops`)
 
 ```python
 from flydsl.expr import buffer_ops
@@ -2110,7 +2092,7 @@ Error  : (none)
 
 ---
 
-### Snippet 4 — Import `flydsl.compiler`
+### Snippet 4 - Import `flydsl.compiler`
 
 ```python
 import flydsl.compiler as flyc
