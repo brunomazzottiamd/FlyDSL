@@ -23,10 +23,13 @@
   [](hipError_t result) {                                                      \
     if (!result)                                                               \
       return;                                                                  \
-    const char *name = hipGetErrorName(result);                                \
-    if (!name)                                                                 \
-      name = "<unknown>";                                                      \
-    fprintf(stderr, "'%s' failed with '%s'\n", #expr, name);                   \
+    const char *errName = hipGetErrorName(result);                             \
+    if (!errName)                                                              \
+      errName = "<unknown>";                                                   \
+    const char *errStr = hipGetErrorString(result);                            \
+    if (!errStr)                                                               \
+      errStr = "<unknown>";                                                    \
+    fprintf(stderr, "'%s' failed with '%s' ('%s')\n", #expr, errName, errStr); \
   }(expr)
 
 thread_local static int32_t defaultDevice = 0;
